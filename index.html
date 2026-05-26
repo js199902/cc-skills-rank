@@ -146,7 +146,7 @@ td.link a:hover{color:var(--amber)}
       <div class="logo">CC</div>
       <div class="title-group">
         <h1>Claude Code Skills</h1>
-        <span>GitHub 排行榜 · 2026年5月</span>
+        <span id="subtitle">GitHub 排行榜 · 加载中...</span>
       </div>
     </div>
     <div class="header-actions">
@@ -211,58 +211,247 @@ td.link a:hover{color:var(--amber)}
 <div class="toast" id="toast"></div>
 
 <script>
-// ===== CORE DATA (with expert evaluations) =====
-const CORE_DATA = {
+// ===== SEED DATA (offline fallback, always replaced on first API success) =====
+const SEED_DATA = {
   top20: [
     {name:"obra/superpowers",stars:195000,gh:"obra/superpowers",eval:"社区影响力最大的Skills合集，20+子技能覆盖TDD/调试/审查/规划全流程。Anthropic官方认可。体量大，全装可能拖慢加载。",rec:5},
-    {name:"affaan-m/everything-claude-code",stars:183000,gh:"affaan-m/everything-claude-code",eval:"58Agent+220Skill+74命令的超级全家桶，Anthropic黑客松冠军。覆盖面无人能及，但内容良莠不齐，全套安装适得其反。",rec:3},
-    {name:"anthropics/skills",stars:137000,gh:"anthropics/skills",eval:"官方18个Skills：文档处理(docx/pdf/pptx/xlsx)+mcp-builder+skill-creator。质量最高、维护最稳定，覆盖面偏窄。",rec:5},
-    {name:"forrestchang/andrej-karpathy-skills",stars:120000,gh:"forrestchang/andrej-karpathy-skills",eval:"单文件CLAUDE.md，Karpathy四大原则的Skill化实现。内容精炼但体量小——读完比装完更有价值。",rec:4},
-    {name:"farion1231/cc-switch",stars:72000,gh:"farion1231/cc-switch",eval:"跨平台桌面应用，一键在Claude Code/Codex/Gemini CLI间切换。功能实用但单一，只用Claude Code则完全不需要。",rec:3},
-    {name:"JuliusBrussee/caveman",stars:61000,gh:"JuliusBrussee/caveman",eval:"Token优化专用技能，实测节省~65%token消耗。省钱效果立竿见影，重度用户值得装。只做一件事。",rec:4},
-    {name:"shanraisshan/claude-code-best-practice",stars:53000,gh:"shanraisshan/claude-code-best-practice",eval:"从「氛围编程」到「工程化编程」的进阶指南。内容质量高但偏教学向——教你怎么写Skill而非直接干活。",rec:4},
-    {name:"ruvnet/ruflo",stars:51000,gh:"ruvnet/ruflo",eval:"100+专业化Agent蜂群编排平台。功能强大但配置复杂，适合需要并行处理大规模任务的团队。",rec:3},
-    {name:"mattpocock/skills",stars:45000,gh:"mattpocock/skills",eval:"TypeScript圈最实用生产级Skills。grill-me/tdd/diagnose三大技能经过验证。非TS开发者收益减半。",rec:5},
-    {name:"sickn33/antigravity-awesome-skills",stars:38000,gh:"sickn33/antigravity-awesome-skills",eval:"1,400+Skills百科全书，9大分类。作为发现Skills的入口极好，但纯索引——你得自己去装具体的。",rec:3},
-    {name:"FridrichMethod/awesome-skills",stars:35000,gh:"FridrichMethod/awesome-skills",eval:"1,800+精选Skills，每周自动从14个上游同步。数量碾压但Snyk扫描显示36%有安全缺陷——安全审核不足是硬伤。",rec:3},
-    {name:"wshobson/agents",stars:35000,gh:"wshobson/agents",eval:"150+预置Agent角色Skills库，QA/SEO/iOS全覆盖。角色定义偏简单，实际效果依赖使用方式。",rec:3},
-    {name:"rohitg00/awesome-claude-code-toolkit",stars:30000,gh:"rohitg00/awesome-claude-code-toolkit",eval:"最全面工具包：135Agent+35Skill+42命令+176插件+14MCP。一站式但内容太多，建议按需取用。",rec:3},
-    {name:"K-Dense-AI/claude-scientific-skills",stars:24000,gh:"K-Dense-AI/claude-scientific-skills",eval:"135个科研专用Skill跨10学科。学术场景唯一选择。研究员/博士生必装，其他人完全用不上。",rec:4},
-    {name:"VoltAgent/awesome-agent-skills",stars:22000,gh:"VoltAgent/awesome-agent-skills",eval:"企业团队类Skills聚合，侧重代码审查流程/发布管理/文档同步。适合团队引入。",rec:3},
-    {name:"MarcelRoozekrans/superpowers-extensions",stars:18000,gh:"MarcelRoozekrans/superpowers-extensions",eval:"Superpowers官方扩展包：回归测试/pre-push审查/重构分析。Superpowers用户必装，其他人需先装主体。",rec:4},
-    {name:"Jamie-BitFlight/claude_skills",stars:15000,gh:"Jamie-BitFlight/claude_skills",eval:"老牌Skills市场，15+插件(Python/Bash/Perl/CI/CD)。质量稳定但更新频率下降，部分依赖较旧。",rec:3},
-    {name:"jeremylongshore/claude-code-plugins-plus-skills",stars:12000,gh:"jeremylongshore/claude-code-plugins-plus-skills",eval:"插件+Skills二合一，v4.20持续迭代。活跃维护中但社区较小。",rec:3},
-    {name:"Mizoreww/awesome-claude-code-config",stars:10000,gh:"Mizoreww/awesome-claude-code-config",eval:"生产级配置：23插件+对抗审查Skill+论文阅读Skill+自改进循环。质量高但宣传不够导致Stars偏低，值得关注。",rec:3},
-    {name:"jacexh/skill-workshop",stars:8000,gh:"jacexh/skill-workshop",eval:"Claude Code插件市场，专注生产力工具。安装体验流畅但上架项目不多，还不成规模。",rec:2}
+    {name:"anthropics/skills",stars:137000,gh:"anthropics/skills",eval:"官方18个Skills：文档处理+mcp-builder+skill-creator。质量最高、维护最稳定。",rec:5},
+    {name:"mattpocock/skills",stars:45000,gh:"mattpocock/skills",eval:"TypeScript圈最实用生产级Skills。grill-me/tdd/diagnose三大技能经过验证。",rec:5},
+    {name:"forrestchang/andrej-karpathy-skills",stars:120000,gh:"forrestchang/andrej-karpathy-skills",eval:"单文件CLAUDE.md，Karpathy四大原则的Skill化实现。读完比装完更有价值。",rec:4},
+    {name:"JuliusBrussee/caveman",stars:61000,gh:"JuliusBrussee/caveman",eval:"Token优化专用技能，实测节省~65%token消耗。重度用户值得装。",rec:4},
+    {name:"K-Dense-AI/claude-scientific-skills",stars:24000,gh:"K-Dense-AI/claude-scientific-skills",eval:"135个科研专用Skill跨10学科。学术场景唯一选择。",rec:4},
+    {name:"shanraisshan/claude-code-best-practice",stars:53000,gh:"shanraisshan/claude-code-best-practice",eval:"从Vibe Coding到Agentic Engineering进阶指南。教学向，质量高。",rec:4},
+    {name:"affaan-m/everything-claude-code",stars:183000,gh:"affaan-m/everything-claude-code",eval:"58Agent+220Skill+74命令超级全家桶。覆盖面无人能及，但良莠不齐。",rec:3},
+    {name:"farion1231/cc-switch",stars:72000,gh:"farion1231/cc-switch",eval:"跨平台桌面应用，一键切换Claude Code/Codex/Gemini CLI。只用CC则不需要。",rec:3},
+    {name:"ruvnet/ruflo",stars:51000,gh:"ruvnet/ruflo",eval:"100+Agent蜂群编排平台。功能强大但配置复杂。",rec:3},
+    {name:"sickn33/antigravity-awesome-skills",stars:38000,gh:"sickn33/antigravity-awesome-skills",eval:"1,400+Skills百科全书。作为索引极好，但纯列表。",rec:3},
+    {name:"FridrichMethod/awesome-skills",stars:35000,gh:"FridrichMethod/awesome-skills",eval:"1,800+精选Skills，每周自动同步。36%有安全缺陷。",rec:3},
+    {name:"wshobson/agents",stars:35000,gh:"wshobson/agents",eval:"150+预置Agent角色Skills，QA/SEO/iOS全覆盖。定义偏简单。",rec:3},
+    {name:"rohitg00/awesome-claude-code-toolkit",stars:30000,gh:"rohitg00/awesome-claude-code-toolkit",eval:"最全面工具包：135Agent+35Skill+42命令+176插件+14MCP。按需取用。",rec:3},
+    {name:"VoltAgent/awesome-agent-skills",stars:22000,gh:"VoltAgent/awesome-agent-skills",eval:"企业团队Skills聚合，侧重代码审查/发布管理/文档同步。",rec:3},
+    {name:"MarcelRoozekrans/superpowers-extensions",stars:18000,gh:"MarcelRoozekrans/superpowers-extensions",eval:"Superpowers扩展包：回归测试/pre-push审查/重构分析。",rec:4},
+    {name:"Jamie-BitFlight/claude_skills",stars:15000,gh:"Jamie-BitFlight/claude_skills",eval:"老牌Skills市场，15+插件。质量稳定但更新频率下降。",rec:3},
+    {name:"jeremylongshore/claude-code-plugins-plus-skills",stars:12000,gh:"jeremylongshore/claude-code-plugins-plus-skills",eval:"插件+Skills二合一，v4.20持续迭代。社区较小。",rec:3},
+    {name:"Mizoreww/awesome-claude-code-config",stars:10000,gh:"Mizoreww/awesome-claude-code-config",eval:"生产级配置：23插件+对抗审查+论文阅读+自改进循环。质量高但宣传不够。",rec:3},
+    {name:"jacexh/skill-workshop",stars:8000,gh:"jacexh/skill-workshop",eval:"Claude Code插件市场。安装体验流畅但上架项目不多。",rec:2}
   ],
   trending: [
-    {name:"mattpocock/skills",stars:45000,growth:"+1,618",gh:"mattpocock/skills",eval:"飙升榜首增速与内容质量高度匹配。「Real Engineering, Not Vibe Coding」击中开发者痛点。",rec:5},
-    {name:"JuliusBrussee/caveman",stars:61000,growth:"+1,200",gh:"JuliusBrussee/caveman",eval:"Token优化是刚需——谁不想省钱？增速合理但效果上限取决于使用方式。",rec:4},
-    {name:"forrestchang/andrej-karpathy-skills",stars:120000,growth:"+1,117",gh:"forrestchang/andrej-karpathy-skills",eval:"Karpathy个人品牌加持占很大比重。增速部分来自「膜拜效应」而非产品力。",rec:4},
-    {name:"obra/superpowers",stars:195000,growth:"+951",gh:"obra/superpowers",eval:"增速稳定而非昙花一现——社区在认真采用这套方法论。没有竞品能在方法论层面挑战它。",rec:5},
-    {name:"shanraisshan/claude-code-best-practice",stars:53000,growth:"+900",gh:"shanraisshan/claude-code-best-practice",eval:"「Vibe Coding→Agentic Engineering」叙事精准抓住社区情绪。教学内容质量高。",rec:4},
-    {name:"farion1231/cc-switch",stars:72000,growth:"+866",gh:"farion1231/cc-switch",eval:"增速反映多模型切换强需求。但功能单一，Claude Code官方可能未来内置此功能。",rec:3},
-    {name:"affaan-m/everything-claude-code",stars:183000,growth:"+858",gh:"affaan-m/everything-claude-code",eval:"增速来自「一站式」需求红利。大量Skills你永远不会触发，挑着用更好。",rec:3},
-    {name:"FridrichMethod/awesome-skills",stars:35000,growth:"+800",gh:"FridrichMethod/awesome-skills",eval:"1,800+Skills体量是核心竞争力。但36%安全缺陷率是硬伤——增速可持续性取决于审核机制。",rec:3},
-    {name:"K-Dense-AI/claude-scientific-skills",stars:24000,growth:"+700",gh:"K-Dense-AI/claude-scientific-skills",eval:"科研专用赛道无竞品，增速来自学术界口口相传。天花板很高。",rec:4},
-    {name:"MarcelRoozekrans/superpowers-extensions",stars:18000,growth:"+600",gh:"MarcelRoozekrans/superpowers-extensions",eval:"Superpowers用户群溢出效应。本身质量好但受众限于已装Superpowers的用户。",rec:4}
+    {name:"mattpocock/skills",stars:45000,growth:"+1,618",gh:"mattpocock/skills",eval:"飙升榜首，Real Engineering, Not Vibe Coding击中开发者痛点。",rec:5},
+    {name:"JuliusBrussee/caveman",stars:61000,growth:"+1,200",gh:"JuliusBrussee/caveman",eval:"Token优化是刚需——谁不想省钱？增速合理。",rec:4},
+    {name:"forrestchang/andrej-karpathy-skills",stars:120000,growth:"+1,117",gh:"forrestchang/andrej-karpathy-skills",eval:"Karpathy个人品牌加持。增速部分来自膜拜效应。",rec:4},
+    {name:"obra/superpowers",stars:195000,growth:"+951",gh:"obra/superpowers",eval:"增速稳定，社区认真采用。无竞品能在方法论层面挑战。",rec:5},
+    {name:"shanraisshan/claude-code-best-practice",stars:53000,growth:"+900",gh:"shanraisshan/claude-code-best-practice",eval:"Vibe→Agentic叙事精准。教学内容质量高。",rec:4},
+    {name:"farion1231/cc-switch",stars:72000,growth:"+866",gh:"farion1231/cc-switch",eval:"增速反映多模型切换需求。功能单一，可能被官方替代。",rec:3},
+    {name:"affaan-m/everything-claude-code",stars:183000,growth:"+858",gh:"affaan-m/everything-claude-code",eval:"一站式需求红利。大量Skills你不会触发，挑着用更好。",rec:3},
+    {name:"FridrichMethod/awesome-skills",stars:35000,growth:"+800",gh:"FridrichMethod/awesome-skills",eval:"体量是核心竞争力。36%安全缺陷率是硬伤。",rec:3},
+    {name:"K-Dense-AI/claude-scientific-skills",stars:24000,growth:"+700",gh:"K-Dense-AI/claude-scientific-skills",eval:"科研赛道无竞品，学术界口口相传。天花板很高。",rec:4},
+    {name:"MarcelRoozekrans/superpowers-extensions",stars:18000,growth:"+600",gh:"MarcelRoozekrans/superpowers-extensions",eval:"Superpowers用户群溢出效应。质量好但受众有限。",rec:4}
   ]
 };
 
+let currentData = JSON.parse(JSON.stringify(SEED_DATA));
+let dataMode = 'seed'; // 'seed' | 'live'
+
 const REC_LABELS = {5:'⭐⭐⭐⭐⭐',4:'⭐⭐⭐⭐',3:'⭐⭐⭐',2:'⭐⭐',1:'⭐'};
-const REC_CLASS = {5:'star5',4:'star4',3:'star3',2:'star2',1:'star1'};
+
+// ===== AUTO-EVALUATION ENGINE =====
+function autoEvaluate(repo){
+  const name = repo.full_name.toLowerCase();
+  const desc = (repo.description||'').toLowerCase();
+  const stars = repo.stargazers_count;
+  const hasLicense = !!repo.license;
+  const daysSinceCreation = Math.max(1, (Date.now() - new Date(repo.created_at).getTime()) / 86400000);
+  const starsPerDay = stars / daysSinceCreation;
+
+  let rec = 3;
+  let evalText = '';
+
+  // Official Anthropic repos
+  if(name.startsWith('anthropics/')){
+    rec = 5;
+    evalText = 'Anthropic官方出品，质量最高、维护最稳定。Claude Code生态核心。';
+  }
+  // Super high quality signal
+  else if(stars > 50000 && hasLicense){
+    rec = 5;
+    evalText = `社区标杆项目，${(stars/1000).toFixed(0)}K开发者用星标投票。文档完善，生态成熟。`;
+  }
+  // High quality
+  else if(stars > 20000 && hasLicense){
+    rec = 4;
+    evalText = `优质项目，社区活跃。${desc ? '定位清晰：'+desc.slice(0,40)+'...' : ''}`;
+  }
+  // Rapid growth
+  else if(starsPerDay > 50){
+    rec = 4;
+    evalText = `增速惊人(${starsPerDay.toFixed(0)}星/天)，热度与质量匹配中，值得关注。`;
+  }
+  // Curated / awesome lists
+  else if(name.includes('awesome')||desc.includes('curated')||desc.includes('collection')){
+    rec = 3;
+    evalText = '精选合集，作为发现入口极好。但本质是索引——你得自己去装具体的Skills。';
+  }
+  // Niche domain
+  else if(desc.includes('scientific')||desc.includes('research')||desc.includes('security')||desc.includes('finance')){
+    rec = 4;
+    evalText = `垂直领域专用${desc.includes('scientific')?'科研':desc.includes('security')?'安全':desc.includes('finance')?'金融':'专业'}Skills。对应角色必装，其他人用不上。`;
+  }
+  // Small / new
+  else if(stars < 5000){
+    rec = 2;
+    evalText = '新兴项目，社区尚小。有潜力但暂未经过大规模验证，建议观望。';
+  }
+  // Medium
+  else if(stars < 15000){
+    rec = 3;
+    evalText = '中等规模项目。按需选择——如果你正好需要它的功能，值得一试。';
+  }
+  // Large
+  else {
+    rec = 4;
+    evalText = desc ? desc.slice(0,60) + '...' : '热门项目，社区活跃。';
+  }
+
+  // Refine: very large stars = at least 4
+  if(stars > 100000 && rec < 4) rec = 4;
+
+  return { eval: evalText, rec: rec };
+}
+
+// ===== GITHUB API: DYNAMIC SEARCH =====
+async function searchGitHub(query, sort='stars', perPage=30){
+  const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=${sort}&order=desc&per_page=${perPage}`;
+  const resp = await fetch(url);
+  if(!resp.ok) throw new Error(`GitHub API error: ${resp.status}`);
+  const json = await resp.json();
+  return json.items || [];
+}
+
+async function fetchRepoDetails(fullName){
+  const resp = await fetch(`https://api.github.com/repos/${fullName}`);
+  if(!resp.ok) return null;
+  return resp.json();
+}
+
+// ===== REFRESH: Real-time dynamic search =====
+async function refreshData(){
+  const btn = document.getElementById('btnRefresh');
+  const dot = document.getElementById('statusDot');
+  btn.classList.add('loading');
+  dot.className = 'status-dot loading-dot';
+  document.getElementById('btnRefresh').querySelector('span').textContent = '搜索中...';
+  showToast('实时搜索 GitHub，获取最新排名...');
+
+  try {
+    // Multi-query search for comprehensive coverage
+    const queries = [
+      'claude skills SKILL.md',
+      'claude-code skills',
+      '.claude skills agent'
+    ];
+
+    // Run all searches in parallel
+    const allResults = await Promise.all(queries.map(q => searchGitHub(q, 'stars', 20)));
+    showToast('分析项目中...');
+
+    // Merge & deduplicate
+    const seen = new Set();
+    const merged = [];
+    for(const items of allResults){
+      for(const item of items){
+        if(!seen.has(item.full_name)){
+          seen.add(item.full_name);
+          merged.push(item);
+        }
+      }
+    }
+
+    // Filter: only Claude Code skills repos (exclude general AI frameworks)
+    const keywords = ['skill','claude','superpower','caveman','SKILL.md','.claude','agent-skill','skills'];
+    const filtered = merged.filter(r => {
+      const text = (r.full_name+' '+r.description+' '+(r.topics||[]).join(' ')).toLowerCase();
+      return keywords.some(k => text.includes(k));
+    });
+
+    // Sort by stars
+    filtered.sort((a,b) => b.stargazers_count - a.stargazers_count);
+
+    // Build Top 20 with auto-evaluations
+    const top20Raw = filtered.slice(0, 20);
+    const top20 = top20Raw.map(r => ({
+      name: r.full_name,
+      stars: r.stargazers_count,
+      gh: r.full_name,
+      ...autoEvaluate(r)
+    }));
+
+    // Build Trending 10 (by stars per day)
+    const withGrowth = filtered.map(r => ({
+      ...r,
+      _spd: r.stargazers_count / Math.max(1, (Date.now() - new Date(r.created_at).getTime()) / 86400000)
+    }));
+    withGrowth.sort((a,b) => b._spd - a._spd);
+    const trending = withGrowth.slice(0, 10).map(r => ({
+      name: r.full_name,
+      stars: r.stargazers_count,
+      growth: '+' + Math.round(r._spd * 7).toLocaleString(),
+      gh: r.full_name,
+      ...autoEvaluate(r)
+    }));
+
+    // Update living data
+    currentData = { top20, trending };
+    dataMode = 'live';
+
+    // Auto-generate summary recommendations
+    const official = top20.filter(r => r.gh.startsWith('anthropics/'));
+    const top5 = top20.filter(r => r.rec === 5);
+    const top4 = top20.filter(r => r.rec >= 4);
+    const only23 = top20.filter(r => r.rec <= 3 && r.rec >= 2);
+
+    window._summaryMust = top5.slice(0,4).map(r => `<li><strong>${r.name}</strong> — ${r.eval.slice(0,50)}</li>`);
+    window._summaryRole = [
+      `<li><strong>前端/TS</strong> → ${top4.filter(r=>r.gh.includes('matt')||r.gh.includes('vercel')).map(r=>r.name.split('/')[1]).join(' + ')||'搜索中'}</li>`,
+      `<li><strong>后端/全栈</strong> → ${top4.filter(r=>r.gh.includes('superpower')||r.gh.includes('best-practice')).map(r=>r.name.split('/')[1]).join(' + ')||top4.slice(0,2).map(r=>r.name).join(' + ')}</li>`,
+      `<li><strong>学术/研究</strong> → ${top4.filter(r=>r.gh.includes('scien')||r.gh.includes('karpathy')).map(r=>r.name.split('/')[1]).join(' + ')||'搜索中'}</li>`,
+      `<li><strong>团队</strong> → ${top4.filter(r=>r.gh.includes('volt')||r.gh.includes('extension')||r.gh.includes('agent-skill')).map(r=>r.name.split('/')[1]).join(' + ')||'搜索中'}</li>`,
+      `<li><strong>省钱</strong> → ${top4.filter(r=>r.gh.includes('caveman')).map(r=>r.name.split('/')[1]).join(' + ')||'搜索中'}</li>`
+    ];
+    window._summaryWatch = only23.slice(0,4).map(r => `<li><strong>${r.name.split('/')[1]||r.name}</strong> — ${r.eval.slice(0,40)}</li>`);
+
+    // Save to cache
+    localStorage.setItem('cc-skills-data', JSON.stringify({
+      top20, trending, mode: 'live', timestamp: Date.now(),
+      summaryMust: window._summaryMust,
+      summaryRole: window._summaryRole,
+      summaryWatch: window._summaryWatch
+    }));
+
+    renderAll();
+    dot.className = 'status-dot';
+    document.getElementById('btnRefresh').querySelector('span').textContent = '刷新数据';
+    btn.classList.remove('loading');
+    showToast(`实时数据 · 共发现 ${filtered.length} 个相关仓库`, 'success');
+  } catch(e){
+    dot.className = 'status-dot offline';
+    document.getElementById('btnRefresh').querySelector('span').textContent = '刷新数据';
+    btn.classList.remove('loading');
+    showToast('API 限流或无网络，显示缓存数据', 'error');
+    console.error('Refresh error:', e);
+  }
+}
 
 // ===== RENDER =====
 function starDisplay(rec){return `<span class="stars-display" style="color:var(--star${rec})">${REC_LABELS[rec]}</span>`;}
 
 function renderRow(item,idx,isTrending){
   const ghUrl = `https://github.com/${item.gh}`;
-  let html = `<tr style="animation-delay:${idx*40}ms">`;
+  let html = `<tr style="animation-delay:${idx*35}ms">`;
   html += `<td class="rank">${idx+1}</td>`;
   html += `<td class="name"><a href="${ghUrl}" target="_blank" rel="noopener">${item.name}</a></td>`;
-  html += `<td class="stars">${(item.stars/1000).toFixed(0)}K</td>`;
-  if(isTrending) html += `<td class="growth">${item.growth}/周</td>`;
-  html += `<td class="eval">${item.eval}</td>`;
+  html += `<td class="stars">${item.stars>=1000?(item.stars/1000).toFixed(1)+'K':item.stars}</td>`;
+  if(isTrending) html += `<td class="growth">${item.growth||'--'}/周</td>`;
+  html += `<td class="eval">${item.eval||''}</td>`;
   html += `<td class="rec">${starDisplay(item.rec)}</td>`;
   html += `<td class="link"><a href="${ghUrl}" target="_blank" rel="noopener">GH ↗</a></td>`;
   html += `</tr>`;
@@ -270,35 +459,28 @@ function renderRow(item,idx,isTrending){
 }
 
 function renderAll(){
-  document.getElementById('tbody-top20').innerHTML = CORE_DATA.top20.map((item,i)=>renderRow(item,i,false)).join('');
-  document.getElementById('tbody-trending').innerHTML = CORE_DATA.trending.map((item,i)=>renderRow(item,i,true)).join('');
-  // Summary
-  document.getElementById('summary-must').innerHTML = [
-    '<li><strong>anthropics/skills</strong> — 官方文档处理，人手必备</li>',
-    '<li><strong>obra/superpowers</strong> — TDD→调试→审查→部署一条龙</li>',
-    '<li><strong>mattpocock/skills</strong> — TS/JS开发者唯一必装</li>'
-  ].join('');
-  document.getElementById('summary-role').innerHTML = [
-    '<li><strong>前端/TS</strong> → superpowers + mattpocock + anthropics</li>',
-    '<li><strong>后端/全栈</strong> → superpowers + anthropics + best-practice</li>',
-    '<li><strong>学术</strong> → K-Dense-AI/scientific-skills + superpowers</li>',
-    '<li><strong>团队</strong> → VoltAgent + superpowers-extensions</li>',
-    '<li><strong>省钱</strong> → caveman（省~65%token）</li>'
-  ].join('');
-  document.getElementById('summary-watch').innerHTML = [
-    '<li><strong>ECC</strong> — 内容太杂，等社区筛选</li>',
-    '<li><strong>FridrichMethod</strong> — 36%有安全缺陷</li>',
-    '<li><strong>cc-switch</strong> — 功能单一，可能被官方内置</li>',
-    '<li><strong>skill-workshop</strong> — 规模太小</li>'
-  ].join('');
+  document.getElementById('subtitle').textContent = `GitHub 排行榜 · ${dataMode==='live'?'实时数据':'缓存模式'}`;
+  document.getElementById('tbody-top20').innerHTML = currentData.top20.map((item,i)=>renderRow(item,i,false)).join('');
+  document.getElementById('tbody-trending').innerHTML = currentData.trending.map((item,i)=>renderRow(item,i,true)).join('');
+
+  // Summary - use cached dynamic or fallback to static defaults
+  const defaults = {
+    must: ['<li><strong>anthropics/skills</strong> — 官方文档处理，人手必备</li>','<li><strong>obra/superpowers</strong> — TDD→调试→审查→部署一条龙</li>','<li><strong>mattpocock/skills</strong> — TS/JS开发者唯一必装</li>'],
+    role: ['<li><strong>前端/TS</strong> → superpowers + mattpocock + anthropics</li>','<li><strong>后端/全栈</strong> → superpowers + anthropics + best-practice</li>','<li><strong>学术</strong> → K-Dense-AI/scientific-skills + superpowers</li>','<li><strong>团队</strong> → VoltAgent + superpowers-extensions</li>','<li><strong>省钱</strong> → caveman（省~65%token）</li>'],
+    watch: ['<li><strong>ECC</strong> — 内容太杂，等社区筛选</li>','<li><strong>FridrichMethod</strong> — 36%有安全缺陷</li>','<li><strong>cc-switch</strong> — 功能单一，可能被官方内置</li>','<li><strong>skill-workshop</strong> — 规模太小</li>']
+  };
+  document.getElementById('summary-must').innerHTML = (window._summaryMust||defaults.must).join('');
+  document.getElementById('summary-role').innerHTML = (window._summaryRole||defaults.role).join('');
+  document.getElementById('summary-watch').innerHTML = (window._summaryWatch||defaults.watch).join('');
   updateTimestamp();
 }
 
 // ===== TIMESTAMP =====
 function updateTimestamp(){
   const now = new Date();
+  const modeLabel = dataMode==='live'?'实时':'缓存';
   document.getElementById('timestamp').textContent =
-    `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} (${modeLabel})`;
 }
 
 // ===== TABS =====
@@ -308,76 +490,6 @@ function switchTab(tab){
   });
   document.getElementById('tab-top20').classList.toggle('active',tab==='top20');
   document.getElementById('tab-trending').classList.toggle('active',tab==='trending');
-}
-
-// ===== GITHUB API REFRESH =====
-async function refreshData(){
-  const btn = document.getElementById('btnRefresh');
-  const dot = document.getElementById('statusDot');
-  btn.classList.add('loading');
-  dot.className = 'status-dot loading-dot';
-  showToast('正在从 GitHub 拉取最新数据...');
-
-  try {
-    const updates = {};
-    // Search for known repos to get fresh star counts
-    const allRepos = [...CORE_DATA.top20, ...CORE_DATA.trending];
-    const uniqueRepos = [...new Set(allRepos.map(r=>r.gh))];
-
-    // Batch into groups of 10 (GitHub API limitation for batch)
-    for(let i=0;i<uniqueRepos.length;i+=10){
-      const batch = uniqueRepos.slice(i,i+10);
-      const promises = batch.map(repo =>
-        fetch(`https://api.github.com/repos/${repo}`)
-          .then(r=>r.ok?r.json():null)
-          .catch(()=>null)
-      );
-      const results = await Promise.all(promises);
-      results.forEach((data,idx)=>{
-        if(data&&data.stargazers_count){
-          updates[batch[idx]] = data.stargazers_count;
-        }
-      });
-    }
-
-    // Apply updates
-    let updated = 0;
-    CORE_DATA.top20.forEach(item=>{
-      if(updates[item.gh] && updates[item.gh] !== item.stars){
-        item.stars = updates[item.gh];
-        updated++;
-      }
-    });
-    CORE_DATA.trending.forEach(item=>{
-      if(updates[item.gh] && updates[item.gh] !== item.stars){
-        item.stars = updates[item.gh];
-        updated++;
-      }
-    });
-
-    // Also search for new trending repos
-    const searchRes = await fetch('https://api.github.com/search/repositories?q=claude+code+skills+SKILL.md&sort=stars&order=desc&per_page=5')
-      .then(r=>r.ok?r.json():null)
-      .catch(()=>null);
-
-    renderAll();
-    // Cache to localStorage
-    localStorage.setItem('cc-skills-data', JSON.stringify({
-      top20: CORE_DATA.top20,
-      trending: CORE_DATA.trending,
-      timestamp: Date.now()
-    }));
-
-    dot.className = 'status-dot';
-    btn.classList.remove('loading');
-    const newMsg = searchRes ? ` · 新发现 ${searchRes.total_count} 个仓库` : '';
-    showToast(`已更新 ${updated} 个星标数据${newMsg}`, 'success');
-  } catch(e){
-    dot.className = 'status-dot offline';
-    btn.classList.remove('loading');
-    showToast('获取失败，显示缓存数据', 'error');
-    console.error('Refresh error:', e);
-  }
 }
 
 // ===== TOAST =====
@@ -392,7 +504,6 @@ function showToast(msg,type){
 
 // ===== PWA SETUP =====
 function setupPWA(){
-  // Manifest as blob
   const manifest = {
     name:'Claude Code Skills 排行榜',
     short_name:'CC Skills',
@@ -400,48 +511,35 @@ function setupPWA(){
     display:'standalone',
     background_color:'#08080a',
     theme_color:'#08080a',
-    description:'GitHub Claude Code Skills 生态排行榜',
+    description:'GitHub Claude Code Skills 生态实时排行榜',
     icons:[{src:'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192"><rect width="192" height="192" rx="32" fill="#0f0f14"/><text x="96" y="110" text-anchor="middle" font-family="monospace" font-size="64" font-weight="bold" fill="#f49b3f">CC</text><text x="96" y="150" text-anchor="middle" font-family="monospace" font-size="22" fill="#4ade80">SKILLS</text></svg>'),sizes:'192x192',type:'image/svg+xml'}]
   };
-  const manifestBlob = new Blob([JSON.stringify(manifest)],{type:'application/json'});
-  const manifestUrl = URL.createObjectURL(manifestBlob);
-  document.querySelector('link[rel="manifest"]')||(()=>{
-    const link = document.createElement('link');
-    link.rel='manifest';link.href=manifestUrl;
-    document.head.appendChild(link);
-  })();
+  const blob = new Blob([JSON.stringify(manifest)],{type:'application/json'});
+  const link = document.createElement('link');
+  link.rel='manifest';link.href=URL.createObjectURL(blob);
+  document.head.appendChild(link);
 
-  // Service Worker
   if('serviceWorker' in navigator){
-    const swCode = `
-const CACHE='cc-skills-v2';
-const URLS=['${location.href}'];
-self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(URLS)).then(()=>self.skipWaiting()))});
-self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
-self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(resp=>{if(resp.ok){const clone=resp.clone();caches.open(CACHE).then(c=>c.put(e.request,clone))}return resp}).catch(()=>caches.match(e.request))))});
-`;
-    const swBlob = new Blob([swCode],{type:'application/javascript'});
-    const swUrl = URL.createObjectURL(swBlob);
-    navigator.serviceWorker.register(swUrl).catch(()=>{});
+    const sw = `const C='cc-skills-v3';self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(['${location.href}'])).then(()=>self.skipWaiting()))});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(resp=>{if(resp.ok){const cl=resp.clone();caches.open(C).then(c=>c.put(e.request,cl))}return resp}).catch(()=>caches.match(e.request))))});`;
+    navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
   }
 }
 
 // ===== INIT =====
 function init(){
-  // Try to load cached data
   const cached = localStorage.getItem('cc-skills-data');
   if(cached){
     try{
       const data = JSON.parse(cached);
-      // Merge cached star counts (preserve evaluations)
-      data.top20.forEach((cachedItem,i)=>{
-        if(CORE_DATA.top20[i] && cachedItem.stars) CORE_DATA.top20[i].stars = cachedItem.stars;
-      });
-      data.trending.forEach((cachedItem,i)=>{
-        if(CORE_DATA.trending[i] && cachedItem.stars) CORE_DATA.trending[i].stars = cachedItem.stars;
-      });
+      if(data.top20&&data.top20.length>0){
+        currentData = { top20: data.top20, trending: data.trending||data.top20.slice(0,10) };
+        dataMode = data.mode||'cached';
+        window._summaryMust = data.summaryMust||null;
+        window._summaryRole = data.summaryRole||null;
+        window._summaryWatch = data.summaryWatch||null;
+      }
       const age = Date.now() - (data.timestamp||0);
-      if(age<3600000) document.getElementById('statusDot').title = `缓存于 ${Math.round(age/60000)} 分钟前`;
+      if(age<3600000) document.getElementById('statusDot').title = `${dataMode==='live'?'实时':'缓存'} · ${Math.round(age/60000)}分钟前`;
     }catch(e){}
   }
   renderAll();
